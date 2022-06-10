@@ -46,7 +46,7 @@ const useStyles = makeStyles(() => ({
   },
   itemBoxStyle: {
     backgroundColor: 'rgba(47, 19, 74, 0.25)',
-    padding: '1%',
+    padding: '2%',
     margin: '2%',
     borderRadius: '10px',
   },
@@ -107,15 +107,10 @@ const Vote: NextPage = () => {
       const _results: number[] = new Array(_options.length);
       for (let i = 0; i < options.length; i++) {
         const _result = await pollContract.methods.getResult(i).call();
-        if(_result != undefined) {  
           _results[i] = _result;
-        } else {
-          _results[i] = 0;
-        }
       }
       setselectedResults(_results);
     }
-    alert(selectedStatus);
     setSelectedTitle(titles[id]);
   }
 
@@ -170,82 +165,81 @@ const Vote: NextPage = () => {
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Box className={classes.customBoxStyle}>
-            <Grid item sx={{mb:2}}>
-              <Typography className={classes.titleStyle} variant="subtitle2" >Vote</Typography>
-            </Grid>
-            {
-              selectedTitle ? (
-                <Grid item sx={{mb:2}}>
-                  <Grid container>
-                    <Grid xs={10}>
-                      <Typography className={classes.titleStyle} >{selectedTitle}</Typography>
+        {
+          selectedStatus ? (
+            <Box className={classes.customBoxStyle}>
+              <Grid item sx={{mb:2}}>
+                <Typography className={classes.titleStyle} variant="subtitle2" >Vote</Typography>
+              </Grid>
+              {
+                selectedTitle ? (
+                  <Grid item sx={{mb:2}}>
+                    <Grid container>
+                      <Grid xs={9}>
+                        <Typography className={classes.titleStyle} >{selectedTitle}</Typography>
+                      </Grid>
+                      <Grid xs={3}>
+                        <Button className={classes.finishButtonStyle} disabled={!isOwner()} onClick={ () => handleFinishVote() }> Finish </Button>
+                      </Grid>
                     </Grid>
-                    <Grid xs={2}>
-                      <Button className={classes.finishButtonStyle} disabled={!isOwner()} onClick={ () => handleFinishVote() }> Finish </Button>
-                    </Grid>
+                    {
+                        options.map((value, index) => {
+                        return (
+                          <Box className={classes.itemBoxStyle}  key={index}>
+                            <ListItem>
+                              <Grid container>
+                                <Grid xs={10} md={10} lg={10} item>
+                                  <Typography
+                                  >{options[index]}</Typography>
+                                </Grid>
+                                <Grid xs={1} md={1} lg={1} item>
+                                  <Button>
+                                    <MdOutlineHowToVote onClick={() => handleVote(index)}/>
+                                  </Button>
+                                </Grid>
+                              </Grid>
+                            </ListItem>
+                          </Box>
+                      )})
+                    }
                   </Grid>
-                {
-                    options.map((value, index) => {
-                    return (
-                      
-                        <Box className={classes.itemBoxStyle}  key={index}>
-                          <ListItem>
-                            <Grid container>
-                              <Grid xs={10} md={10} lg={10} item>
+                ) : (
+                  <CircularProgress/>
+                )}
+            </Box>
+          ) : (
+            <Box className={classes.customBoxStyle}>
+              <Grid item sx={{mb:2}}>
+                  <Typography className={classes.titleStyle} variant="subtitle2" >Vote</Typography>
+              </Grid>
+              <Grid item>
+              {
+                selectedTitle ? (
+                  <Grid item sx={{mb:2}}>
+                  <Typography className={classes.titleStyle} >{selectedTitle} {"(finished)"}</Typography>
+                  {
+                      options.map((value, index) => {
+                      return (
+                        <Box className={classes.itemBoxStyle} key={index}>
+                          <Grid container>
+                              <Grid xs={10}>
                                 <Typography
                                 >{options[index]}</Typography>
                               </Grid>
-                              <Grid xs={1} md={1} lg={1} item>
-                                <Button>
-                                  <MdOutlineHowToVote onClick={() => handleVote(index)}/>
-                                </Button>
+                              <Grid xs={2}>
+                                <Typography>{" + "} {selectedResults ? (selectedResults[index]) : (0) }</Typography>
                               </Grid>
-                            </Grid>
-                          </ListItem>
+                          </Grid>
                         </Box>
-
-                  )})
-                }
-                </Grid>
-              ) : (
-                <CircularProgress/>
-              )}
-          </Box>
-        </Grid>
-      
-        <Grid item lg={12} md={12} xs={12}>
-          <Box className={classes.customBoxStyle}>
-            <Grid item sx={{mb:2}}>
-                <Typography className={classes.titleStyle} variant="subtitle2" >Voting Result</Typography>
-            </Grid>
-            <Grid item>
-            {
-              selectedTitle ? (
-                <Grid item sx={{mb:2}}>
-                <Typography className={classes.titleStyle} >{selectedTitle}</Typography>
-                {
-                    options.map((value, index) => {
-                    return (
-                      <Box className={classes.itemBoxStyle} key={index}>
-                        <Grid container>
-                            <Grid xs={10}>
-                              <Typography
-                              >{options[index]}</Typography>
-                            </Grid>
-                            <Grid xs={2}>
-                              <Typography>{" + "}{selectedResults ? selectedResults[index] : 0}</Typography>
-                            </Grid>
-                        </Grid>
-                      </Box>
-                  )})
-                }
-                </Grid>
-              ) : (
-                <CircularProgress/>
-              )}
-            </Grid>
-          </Box>
+                    )})
+                  }
+                  </Grid>
+                ) : (
+                  <CircularProgress/>
+                )}
+              </Grid>
+            </Box>
+          )}
         </Grid>
       </Grid>
     </Container>

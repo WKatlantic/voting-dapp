@@ -91,9 +91,10 @@ const Home: NextPage = () => {
   };
 
   const handleCreateVotingPol = async() => {
-    alert(options);
-    if(yamClient != undefined) {
-      await yamClient.contracts.contractsMap['VotingFactory'].methods.newVotingPoll(title, options).send({from:account});
+    if(title) {
+      if(yamClient != undefined) {
+        await yamClient.contracts.contractsMap['VotingFactory'].methods.newVotingPoll(title, options).send({from:account});
+      }
     }
   }
 
@@ -176,7 +177,7 @@ const Home: NextPage = () => {
               <Grid lg={6}>
                 <Button sx={{width: '90%', mt:2,}}
                 onClick={handleCreateVotingPol}
-                >Create VotingPol</Button>
+                >Create VotingPoll</Button>
               </Grid>
             </Grid>
           </Box>
