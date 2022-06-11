@@ -40,7 +40,7 @@ const NavBar: NextPage = () => {
   const _renderConnectWalletButton = () => {
 
     return (
-      <Stack direction="row" spacing={2}>
+      <Stack direction="row" spacing={2} sx={{border:'solid black 2px', borderRadius:'15px',}}>
         {!account ? (
           <Button
             color="primary"
@@ -50,7 +50,7 @@ const NavBar: NextPage = () => {
           </Button>
         ) : (
           <Button 
-            color="secondary"
+            color="primary"
             onClick={handleDisconnectWallet}
           >
             {addr.substr(0,5) + "..." + addr.substr(addr.length - 6, addr.length)}

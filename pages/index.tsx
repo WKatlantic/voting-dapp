@@ -7,56 +7,15 @@ import { useYam } from '../hooks';
 import { Web3ModalContext } from '../contexts';
 
 const useStyles = makeStyles(() => ({
-  networkIconStyle: {
-    color: 'white',
-    display:'flex',
-    alignItems:'center',
-    marginRight: '3%',
-    marginBottom:'2%',
-  },
- 
-  inRowStyle: {
-    display:'flex',
-  },
-
   customInput: {
+    color:'black',
     width:'100%',
     marginTop:'2%',
-  },
-
-  optionInput: {
-    width:'100%',
-    color:'red',
-  },
-
-  iconStyle: {
-    justifyContent:'center',
   },
   dashContainerStyle: {
     marginTop:'100px',
     marginLeft:'5%',
   },
-  subTitleStyle: {
-    fontFamily:'Montserrat',
-    fontSize:'16px',
-    fontWeight:'bold',
-    lineHeight:'35px',
-    marginRight:'10px',
-    wordWrap:'break-word',
-  },
-  subContentStyle: {
-    fontFamily:'Montserrat',
-    fontSize:'20px',
-    lineHeight:'35px',
-    wordWrap:'break-word',
-  },
-  balanceTitleStyle: {
-    fontFamily:'Montserrat',
-    fontSize:'12px',
-    fontWeight:'bold',
-    lineHeight:'35px',
-  },
-
   calcBoxStyle: {
     padding:'5%',
     height:'100%',
@@ -65,7 +24,6 @@ const useStyles = makeStyles(() => ({
     marginBottom: '10%',
     marginLeft:'5%',
   },
-
 }));
 
 const Home: NextPage = () => {
@@ -73,6 +31,7 @@ const Home: NextPage = () => {
   const { account } = useContext(Web3ModalContext);
   const [title, setTitle] = useState<string>("");
   const [options, setOptions] = useState<string[]>([""]);
+  const [optionCounts, setOptionCounts] = useState<number>(0);
   const [autofocus, setAutofocus] = useState<string | number>("title");
   const yamClient = useYam();
 
@@ -81,20 +40,32 @@ const Home: NextPage = () => {
   };
 
   const handleOptionAdd = () => {
-    setOptions([...options, ""]);
-    setAutofocus(options.length);
+    if(options.length > 0) {
+      if(options[optionCounts].length == 0) {
+        alert("Please set exact option value!");
+      } else {
+        setOptionCounts(optionCounts + 1);
+        setOptions([...options, ""]);
+        setAutofocus(options.length);
+      }
+    }
   };
 
   const handleOptionDelete = (_index: number) => {
-    setOptions(options.filter((value, index) => index !== _index));
+    if(optionCounts > 0) {
+      setOptionCounts(optionCounts - 1);
+      setOptions(options.filter((value, index) => index !== _index));
+    }
   };
 
   const handleCreateVotingPol = async() => {
-    if(title) {
-      if(yamClient != undefined) {
-        await yamClient.contracts.contractsMap['VotingFactory'].methods.newVotingPoll(title, options).send({from:account});
+      if(title.length >=1 && options[optionCounts].length >=1 ) {
+        if(yamClient != undefined) {
+           await yamClient.contracts.contractsMap['VotingFactory'].methods.newVotingPoll(title, options).send({from:account});
+        }
+      } else {
+        alert("Please set exact Title value!");
       }
-    }
   }
 
   const handleOptionChange = (_value: string, _index: number) => {
@@ -102,6 +73,7 @@ const Home: NextPage = () => {
       options.map((value, index) => (index === _index ? _value : value))
     );
   };
+
   return (
     <Container className={classes.dashContainerStyle}>
       <Grid container spacing={6}>
@@ -117,28 +89,28 @@ const Home: NextPage = () => {
         <Grid lg={8} md={12} xs={12} item>  
           <Box className={classes.calcBoxStyle}>
             <Grid item sx={{mb:3,}}>
-              <Typography className={classes.subTitleStyle}>Voting Title:</Typography>
+              <Typography>Voting Title:</Typography>
               <TextField className={classes.customInput}
                 value={title}
-                onChange={(e) => handleTitleChange(e.target.value)}
+                onChange={(e:any) => handleTitleChange(e.target.value)}
                 autoFocus={autofocus === "title"}
               />
             </Grid>
+            <br/>
+            <Typography>Input Number of Voting Options:</Typography>
 
-            <Typography className={classes.subTitleStyle}>Input Number of Voting Options:</Typography>
-
-            <Grid item lg={12} md={12} xs={12} >
+            <Grid lg={12} md={12} xs={12} item>
               {options.map((value, index) => (
-                <Grid container key={index}>
+                <Grid container key={index+1}>
                   <Grid xs={11}>
                     <TextField  className={classes.customInput}
-                    onChange={(e) => handleOptionChange(e.target.value, index)}
+                    onChange={(e:any) => handleOptionChange(e.target.value, index)}
                     autoFocus={index === autofocus}
                     variant="standard"
                     />
                   </Grid>
                   <Grid xs={1} sx={{bt:3,}}>
-                    <Typography onClick={(e) => handleOptionDelete(index)}>X</Typography>
+                    <Typography onClick={() => handleOptionDelete(index)}>X</Typography>
                   </Grid>
                 </Grid>
               ))}

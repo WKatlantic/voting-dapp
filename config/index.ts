@@ -1,7 +1,3 @@
-export const MORALIS_SERVER_URL = "https://ty7ttshwev7r.usemoralis.com:2053/server";
-export const MORALIS_APP_ID = "wK36eTnEubsFHqXbwWZ0m31RYKGC6ibofNwwTOvn";
-export const MORALIS_MASTER_KEY = "oivOABWSwJHNd4NJ9TJO8h3hYzDzQTb9ATF6XyUZ";
-
 export const CMC_KEY = "980181ba-4dbd-4f5d-8136-512067bdba93";
 
 export const DATA_UNAVAILABLE = '--';

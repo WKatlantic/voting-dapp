@@ -7,23 +7,20 @@ import { useYam } from '../hooks';
 import { Web3ModalContext } from '../contexts';
 import { List, ListItem } from '@mui/material';
 
-// import { handleBreakpoints } from '@mui/system';
 const useStyles = makeStyles(() => ({
   customBoxStyle: {
-    backgroundColor: 'rgba(47, 19, 74, 0.25)',
+    background: 'linear-gradient(to bottom, rgba(78, 14, 238, 0.25), rgba(123,122, 231, 0.25))',
     padding: '7%',
-    borderRadius: '10px',
     height: '100%',
   },
   votingPollStyle: {
-    backgroundColor: 'rgba(47, 19, 74, 0.25)',
     padding: '2%',
     borderRadius: '10px',
     marginTop:'2%',
     marginBottom:'2%',
   },
   titleStyle: {
-    fontSize:'30px',
+    fontSize:'20px',
     lineHeight:'40px',
     wordWrap:'break-word',
     marginBottom:'20px',
@@ -47,7 +44,6 @@ const useStyles = makeStyles(() => ({
     backgroundColor: 'rgba(47, 19, 74, 0.25)',
     padding: '2%',
     margin: '2%',
-    borderRadius: '10px',
   },
   finishButtonStyle: {
     borderRadius:'20px',
@@ -63,13 +59,13 @@ const Vote: NextPage = () => {
   const { account } = useContext(Web3ModalContext);
   const [votingPolls, setVotingPolls] = useState<string[]>([""]);
   const [selectedPoll, setSelectedPoll] = useState<any>();
-  const [selectedTitle, setSelectedTitle] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState<boolean>();
+  const [selectedTitle, setSelectedTitle] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<boolean>(true);
   const [selectedOwner, setSelectedOwner] = useState<any>();
   const [selectedResults, setselectedResults] = useState<number[]>();
+  const [spinStatus, setSpinStatus] = useState<boolean>(true);
   const [titles, setTitles] = useState<string[]>([""]);
   const [options, setOptions] = useState<string[]>([""]);
-
   const yamClient = useYam();
 
   useEffect(() => {
@@ -93,24 +89,28 @@ const Vote: NextPage = () => {
   }, [yamClient]);
 
   const selectVotingPoll = async (id:any) => {
-    if(yamClient != undefined) {
-      const pollContract = yamClient.contracts.contractsMap['VotingPoll'];
-      pollContract.options.address = votingPolls[id];
-      const _options = await pollContract.methods.getOptions().call();
-      const _status = await pollContract.methods.getStatus().call();
-      const _owner = await pollContract.methods.getOwner().call();
-      setSelectedPoll(pollContract);
-      setOptions(_options);
-      setSelectedOwner(_owner);
-      setSelectedStatus(_status);
-      const _results: number[] = new Array(_options.length);
-      for (let i = 0; i < options.length; i++) {
-        const _result = await pollContract.methods.getResult(i).call();
-          _results[i] = _result;
+    if(votingPolls.length > 0) {
+      if(yamClient != undefined) {
+        setSpinStatus(true);
+        const pollContract = yamClient.contracts.contractsMap['VotingPoll'];
+        pollContract.options.address = votingPolls[id];
+        const _options = await pollContract.methods.getOptions().call();
+        const _status = await pollContract.methods.getStatus().call();
+        const _owner = await pollContract.methods.getOwner().call();
+        setSelectedTitle(titles[id]);
+        setSelectedPoll(pollContract);
+        setOptions(_options);
+        setSelectedOwner(_owner);
+        setSelectedStatus(_status);
+        const _results: number[] = new Array(_options.length);
+        for (let i = 0; i < options.length; i++) {
+          const _result = await pollContract.methods.getResult(i).call();
+            _results[i] = _result;
+        }
+        setselectedResults(_results);
+        setSpinStatus(false);
       }
-      setselectedResults(_results);
     }
-    setSelectedTitle(titles[id]);
   }
 
   const isOwner = () => {
@@ -136,8 +136,8 @@ const Vote: NextPage = () => {
       <Grid container spacing={6}>
         <Grid item xs={12} md={6}>
           <Box className={classes.customBoxStyle}>
-            <Grid item sx={{mb:3}}>
-              <Typography className={classes.titleStyle} variant="subtitle2">Select VotingPoll</Typography>
+            <Grid item>
+              <Typography variant="h5">Select VotingPoll</Typography>
             </Grid>
             <Grid item>
               <List>
@@ -146,11 +146,9 @@ const Vote: NextPage = () => {
                     titles.map((value, index) => {
                       return (
                         <Grid key={index}>
-                          <Box className={classes.itemBoxStyle}>
-                            <ListItem  button onClick={() => selectVotingPoll(index)}>
-                                {titles[index]}
-                            </ListItem>
-                          </Box>
+                          <ListItem button onClick={() => selectVotingPoll(index)}>
+                            <Button>{titles[index]}</Button>
+                          </ListItem>
                         </Grid>
                       )
                     })
@@ -168,14 +166,14 @@ const Vote: NextPage = () => {
           selectedStatus ? (
             <Box className={classes.customBoxStyle}>
               <Grid item sx={{mb:2}}>
-                <Typography className={classes.titleStyle} variant="subtitle2" >Vote</Typography>
+                <Typography variant="h5" >Vote</Typography>
               </Grid>
               {
-                selectedTitle ? (
+                !spinStatus ? (
                   <Grid item sx={{mb:2}}>
                     <Grid container>
                       <Grid xs={9}>
-                        <Typography className={classes.titleStyle} >{selectedTitle}</Typography>
+                        <Typography>{selectedTitle}</Typography>
                       </Grid>
                       <Grid xs={3}>
                         <Button className={classes.finishButtonStyle} disabled={!isOwner()} onClick={ () => handleFinishVote() }> Finish </Button>
@@ -193,7 +191,7 @@ const Vote: NextPage = () => {
                                 </Grid>
                                 <Grid xs={1} md={1} lg={1} item>
                                   <Button>
-                                    <Typography onClick={() => handleVote(index)}>✓</Typography>
+                                    <Button variant="outlined" onClick={() => handleVote(index)}>✓</Button>
                                   </Button>
                                 </Grid>
                               </Grid>
@@ -203,19 +201,23 @@ const Vote: NextPage = () => {
                     }
                   </Grid>
                 ) : (
-                  <CircularProgress/>
+                  selectedTitle ? (
+                    <CircularProgress/>
+                  ) : (
+                    <></>
+                  )
                 )}
             </Box>
           ) : (
             <Box className={classes.customBoxStyle}>
               <Grid item sx={{mb:2}}>
-                  <Typography className={classes.titleStyle} variant="subtitle2" >Vote</Typography>
+                  <Typography variant="h5" >Vote</Typography>
               </Grid>
               <Grid item>
               {
-                selectedTitle ? (
+                !spinStatus ? (
                   <Grid item sx={{mb:2}}>
-                  <Typography className={classes.titleStyle} >{selectedTitle} {"(finished)"}</Typography>
+                  <Typography >{selectedTitle} {"(finished)"}</Typography>
                   {
                       options.map((value, index) => {
                       return (
@@ -234,7 +236,7 @@ const Vote: NextPage = () => {
                   }
                   </Grid>
                 ) : (
-                  <CircularProgress/>
+                  <CircularProgress />
                 )}
               </Grid>
             </Box>

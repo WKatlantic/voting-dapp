@@ -2,6 +2,8 @@ import * as React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import createEmotionServer from '@emotion/server/create-instance';
 import theme from '../src/theme';
+import { ServerStyleSheets } from "@mui/styles";
+
 import createEmotionCache from '../src/createEmotionCache';
 
 export default class MyDocument extends Document {
@@ -11,7 +13,6 @@ export default class MyDocument extends Document {
         <Head>
           {/* PWA primary color */}
           <meta name="theme-color" content={theme.palette.primary.main} />
-          <link rel="shortcut icon" href="/static/favicon.ico" />
           <link
             rel="stylesheet"
             href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
@@ -53,6 +54,7 @@ MyDocument.getInitialProps = async (ctx) => {
   // 3. app.render
   // 4. page.render
 
+  const sheets = new ServerStyleSheets();
   const originalRenderPage = ctx.renderPage;
 
   // You can consider sharing the same emotion cache between all the SSR requests to speed up performance.
@@ -61,13 +63,24 @@ MyDocument.getInitialProps = async (ctx) => {
   const { extractCriticalToChunks } = createEmotionServer(cache);
 
   const ctx1 = ctx;
+
+  // ctx.renderPage = () =>
+  //   originalRenderPage({
+  //     enhanceApp: (App) => (props) => sheets.collect(<App {...props} />),
+  //   });
+
+  // ctx1.renderPage = () =>
+  //   originalRenderPage({
+  //     enhanceApp: (App: any) => (props: any) => sheets.collect(<App emotiionCache={cache} {...props} />),
+  //   });
+
   ctx1.renderPage = () =>
-    originalRenderPage({
-      enhanceApp: (App: any) =>
-        function EnhanceApp(props) {
-          return <App emotionCache={cache} {...props} />;
-        },
-    });
+  originalRenderPage({
+    enhanceApp: (App: any) =>
+      function EnhanceApp(props: any) {
+        return <App emotionCache={cache} {...props} />;
+      },
+  });
 
   const initialProps = await Document.getInitialProps(ctx1);
   // This is important. It prevents emotion to render invalid HTML.
@@ -85,5 +98,6 @@ MyDocument.getInitialProps = async (ctx) => {
   return {
     ...initialProps,
     emotionStyleTags,
+    styles: [...React.Children.toArray(initialProps.styles), sheets.getStyleElement()],
   };
 };
