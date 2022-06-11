@@ -5,7 +5,6 @@ import { Container, Grid, Box, Typography, TextField,Button} from '@mui/material
 import { makeStyles } from "@mui/styles";
 import { useYam } from '../hooks';
 import { Web3ModalContext } from '../contexts';
-import {AiFillDelete} from 'react-icons/Ai';
 
 const useStyles = makeStyles(() => ({
   networkIconStyle: {
@@ -117,7 +116,6 @@ const Home: NextPage = () => {
 
         <Grid lg={8} md={12} xs={12} item>  
           <Box className={classes.calcBoxStyle}>
-
             <Grid item sx={{mb:3,}}>
               <Typography className={classes.subTitleStyle}>Voting Title:</Typography>
               <TextField className={classes.customInput}
@@ -126,43 +124,21 @@ const Home: NextPage = () => {
                 autoFocus={autofocus === "title"}
               />
             </Grid>
-            <br/>
+
             <Typography className={classes.subTitleStyle}>Input Number of Voting Options:</Typography>
 
             <Grid item lg={12} md={12} xs={12} >
-            {/* {options.map((value, index) => (
-              <Grid container>
-                <Grid xs={10}>
-                  <TextField  className={classes.customInput}
-                  onChange={(e) => handleOptionChange(e.target.value, index)}
-                  autoFocus={index === autofocus}
-                  variant="standard"
-                  />
-                </Grid>
-                <Grid xs={1}>
-                </Grid>
-                <Grid xs={1} sx={{bt:3,}}>
-                  <AiFillDelete onClick={(e) => handleOptionDelete(index)}/>
-                  <Typography>delete:</Typography>
-                </Grid>
-              </Grid>
-              ))} */}
-              
               {options.map((value, index) => (
-                <Grid container key={index+1}>
-                  <Grid xs={10}>
+                <Grid container key={index}>
+                  <Grid xs={11}>
                     <TextField  className={classes.customInput}
                     onChange={(e) => handleOptionChange(e.target.value, index)}
                     autoFocus={index === autofocus}
                     variant="standard"
                     />
                   </Grid>
-
-                  <Grid xs={1}>
-                  </Grid>
-
                   <Grid xs={1} sx={{bt:3,}}>
-                    <AiFillDelete onClick={(e) => handleOptionDelete(index)}/>
+                    <Typography onClick={(e) => handleOptionDelete(index)}>X</Typography>
                   </Grid>
                 </Grid>
               ))}
