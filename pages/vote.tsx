@@ -194,7 +194,7 @@ const Vote: NextPage = () => {
                                 </Grid>
                                 <Grid xs={1} md={1} lg={1} item>
                                   <Button>
-                                    <MdOutlineHowToVote onClick={() => handleVote(index)}/>
+                                    <Typography onClick={() => handleVote(index)}>recommend</Typography>
                                   </Button>
                                 </Grid>
                               </Grid>
