@@ -31,8 +31,8 @@ type AddressMapOptions = {
 }
 
 export const addressMap: AddressMapOptions = {
-  // 'VotingFactory' : '0x04B8847C8fD6A9d9a50345d5956a4FE5680B8Be5',
-  'VotingFactory' : '0x616bc855b314012069174a5eF8F6a8A3A1D749AE',
+    // 'VotingFactory' : '0x616bc855b314012069174a5eF8F6a8A3A1D749AE',
+    'VotingFactory' : '0xE11E38fB9F9f4227f8F1B31143A34771D5BD2717',
 };
 
 interface TokenInfo {
