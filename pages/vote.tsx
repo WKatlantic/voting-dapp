@@ -193,7 +193,7 @@ const Vote: NextPage = () => {
                                 </Grid>
                                 <Grid xs={1} md={1} lg={1} item>
                                   <Button>
-                                    <Typography onClick={() => handleVote(index)}>recommend</Typography>
+                                    <Typography onClick={() => handleVote(index)}>✓</Typography>
                                   </Button>
                                 </Grid>
                               </Grid>
