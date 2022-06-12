@@ -4,7 +4,7 @@ export const DATA_UNAVAILABLE = '--';
 
 export const defaultChainId = 3;
 
-export const VOTING_FACTORY_ADDRESS = "0x616bc855b314012069174a5eF8F6a8A3A1D749AE";
+export const VOTING_FACTORY_ADDRESS = "0x240020507b0B8d37226045aff1ac068Ab7CC36e2";
 
 interface IRpcUrls {
   [key: number]: string
@@ -31,8 +31,14 @@ type AddressMapOptions = {
 }
 
 export const addressMap: AddressMapOptions = {
-    // 'VotingFactory' : '0x616bc855b314012069174a5eF8F6a8A3A1D749AE',
-    'VotingFactory' : '0xE11E38fB9F9f4227f8F1B31143A34771D5BD2717',
+  
+  // 'VotingFactory' : '0x616bc855b314012069174a5eF8F6a8A3A1D749AE',
+  // 'VotingFactory' : '0xE11E38fB9F9f4227f8F1B31143A34771D5BD2717',
+  // 'VotingFactory' : '0x5bb74FA5fDf8F74D1A71EF4383CaE64E88cC4A0B',
+  // 'VotingFactory' : '0x240020507b0B8d37226045aff1ac068Ab7CC36e2',
+  // 'VotingFactory' : '0x7277cCd28D3dd4364be8Db1271d757B37Cf9DaD0',
+  'VotingFactory' : '0x89B1f1712335FfEc4739D3dF34Cf76eEE808e53A',
+
 };
 
 interface TokenInfo {

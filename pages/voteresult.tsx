@@ -54,12 +54,16 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const Vote: NextPage = () => {
+const Voteresult: NextPage = () => {
   const classes = useStyles();
   const { account } = useContext(Web3ModalContext);
   const [votingPolls, setVotingPolls] = useState<string[]>([""]);
   const [selectedPoll, setSelectedPoll] = useState<any>();
   const [selectedTitle, setSelectedTitle] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<boolean>(true);
+  const [selectedOwner, setSelectedOwner] = useState<any>();
+  const [selectedResults, setselectedResults] = useState<number[]>();
+  const [selectedIsVote, setSelectedIsVote] = useState<boolean>(true);
   const [spinStatus, setSpinStatus] = useState<boolean>(true);
   const [titles, setTitles] = useState<string[]>([""]);
   const [options, setOptions] = useState<string[]>([""]);
@@ -92,12 +96,37 @@ const Vote: NextPage = () => {
         const pollContract = yamClient.contracts.contractsMap['VotingPoll'];
         pollContract.options.address = votingPolls[id];
         const _options = await pollContract.methods.getOptions().call();
+        const _status = await pollContract.methods.getMultiCheck(account).call();
         const _owner = await pollContract.methods.getOwner().call();
+        // const _multiCheck = await pollContract.methods.getOwner().call();
         setSelectedTitle(titles[id]);
         setSelectedPoll(pollContract);
         setOptions(_options);
+        setSelectedOwner(_owner);
+        if(_status > 0) {
+          setSelectedStatus(false);
+        } else {
+          setSelectedStatus(true);
+        }
+        const _results: number[] = new Array(_options.length);
+        for (let i = 0; i < options.length; i++) {
+          const _result = await pollContract.methods.getResult(i).call();
+            _results[i] = _result;
+        }
+        setselectedResults(_results);
         setSpinStatus(false);
       }
+    }
+    
+  }
+
+  const isOwner = () => {
+    return (account==selectedOwner);
+  }
+
+  const handleFinishVote = async () => {
+    if(yamClient != undefined) {
+      await selectedPoll.methods.pauseVoting().send({from:account});
     }
   }
 
@@ -140,53 +169,66 @@ const Vote: NextPage = () => {
         </Grid>
 
         <Grid item xs={12} md={6}>
+        {
+          selectedStatus ? (
             <Box className={classes.customBoxStyle}>
               <Grid item sx={{mb:2}}>
-                <Typography variant="h5" >Vote</Typography>
+                <Typography variant="h5" >Voting Result</Typography>
               </Grid>
-              <Grid item sx={{mb:2}}>
-                <Grid container>
-                  {
-                  spinStatus ? (
-                    !selectedTitle ? (
-                      <></>
-                    ) : (
-                      <CircularProgress/>
-                    )
-                  ) : (
-                    <Grid xs={12}>
-                      <Grid >
-                          <Typography>{selectedTitle}</Typography>
+              {
+                !spinStatus ? (
+                  <Grid item sx={{mb:2}}>
+                    <Grid container>
+                      <Grid xs={12}>
+                        <Typography>{"You can only see the result after vote."}<br/></Typography>
                       </Grid>
-                    {
-                      options.map((value, index) => {
-                        return (
-                          <Box className={classes.itemBoxStyle}  key={index}>
-                            <ListItem>
-                              <Grid container>
-                                <Grid xs={10} md={10} lg={10} item>
-                                  <Typography
-                                  >{options[index]}</Typography>
-                                </Grid>
-                                <Grid xs={1} md={1} lg={1} item>
-                                  <Button>
-                                    <Button variant="outlined" onClick={() => handleVote(index)}>✓</Button>
-                                  </Button>
-                                </Grid>
-                              </Grid>
-                            </ListItem>
-                          </Box>
-                      )})
-                      }
                     </Grid>
-                  )}
-                </Grid>
+                  </Grid>
+                ) : (
+                  selectedTitle ? (
+                    <CircularProgress/>
+                  ) : (
+                    <></>
+                  )
+                )}
+            </Box>
+          ) : (
+            <Box className={classes.customBoxStyle}>
+              <Grid item sx={{mb:2}}>
+                  <Typography variant="h5" >Vote</Typography>
+              </Grid>
+              <Grid item>
+              {
+                !spinStatus ? (
+                  <Grid item sx={{mb:2}}>
+                  <Typography variant="h5">{selectedTitle} {"(finished)"}</Typography>
+                  {
+                      options.map((value, index) => {
+                      return (
+                        <Box className={classes.itemBoxStyle} key={index}>
+                          <Grid container>
+                              <Grid xs={10}>
+                                <Typography
+                                >{options[index]}</Typography>
+                              </Grid>
+                              <Grid xs={2}>
+                                <Typography>{" + "} {selectedResults ? (selectedResults[index]) : (0) }</Typography>
+                              </Grid>
+                          </Grid>
+                        </Box>
+                    )})
+                  }
+                  </Grid>
+                ) : (
+                  <CircularProgress />
+                )}
               </Grid>
             </Box>
-          </Grid>
+          )}
+        </Grid>
       </Grid>
     </Container>
   );
 };
 
-export default Vote;
+export default Voteresult;

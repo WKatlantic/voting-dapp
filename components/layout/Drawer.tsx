@@ -43,6 +43,15 @@ export default function PermanentDrawerLeft(props: Props) {
             </Link>
           </List>
       </Box>
+      <Box >
+          <List>
+            <Link href="/voteresult" passHref>
+                <ListItem key="Voting" selected={router.asPath == '/voteresult'}>
+                  <Button>{"Show Result"}</Button>
+                </ListItem>
+            </Link>
+          </List>
+      </Box>
       <Divider />
     </Stack>
   );
