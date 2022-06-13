@@ -61,9 +61,7 @@ const Voteresult: NextPage = () => {
   const [selectedPoll, setSelectedPoll] = useState<any>();
   const [selectedTitle, setSelectedTitle] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<boolean>(true);
-  const [selectedOwner, setSelectedOwner] = useState<any>();
   const [selectedResults, setselectedResults] = useState<number[]>();
-  const [selectedIsVote, setSelectedIsVote] = useState<boolean>(true);
   const [spinStatus, setSpinStatus] = useState<boolean>(true);
   const [titles, setTitles] = useState<string[]>([""]);
   const [options, setOptions] = useState<string[]>([""]);
@@ -98,11 +96,9 @@ const Voteresult: NextPage = () => {
         const _options = await pollContract.methods.getOptions().call();
         const _status = await pollContract.methods.getMultiCheck(account).call();
         const _owner = await pollContract.methods.getOwner().call();
-        // const _multiCheck = await pollContract.methods.getOwner().call();
         setSelectedTitle(titles[id]);
         setSelectedPoll(pollContract);
         setOptions(_options);
-        setSelectedOwner(_owner);
         if(_status > 0) {
           setSelectedStatus(false);
         } else {
@@ -116,25 +112,6 @@ const Voteresult: NextPage = () => {
         setselectedResults(_results);
         setSpinStatus(false);
       }
-    }
-    
-  }
-
-  const isOwner = () => {
-    return (account==selectedOwner);
-  }
-
-  const handleFinishVote = async () => {
-    if(yamClient != undefined) {
-      await selectedPoll.methods.pauseVoting().send({from:account});
-    }
-  }
-
-  const handleVote = async (id:number) => {
-    if(yamClient != undefined) {
-      const pollContract = yamClient.contracts.contractsMap['VotingPoll'];
-      pollContract.options.address = votingPolls[selectedPoll];
-      await pollContract.methods.voting(id).send({from:account});
     }
   }
 
@@ -201,7 +178,7 @@ const Voteresult: NextPage = () => {
               {
                 !spinStatus ? (
                   <Grid item sx={{mb:2}}>
-                  <Typography variant="h5">{selectedTitle} {"(finished)"}</Typography>
+                  <Typography variant="h5">{selectedTitle}</Typography>
                   {
                       options.map((value, index) => {
                       return (

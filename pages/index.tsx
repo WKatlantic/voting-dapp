@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { useState, useContext } from 'react';
 import type { NextPage } from 'next';
-import { Container, Grid, Box, Typography, TextField,Button} from '@mui/material';
+import { Container, Grid, Box, Typography, TextField, Button} from '@mui/material';
+import LinearProgress from '@mui/material/LinearProgress';
 import { makeStyles } from "@mui/styles";
 import { useYam } from '../hooks';
 import { Web3ModalContext } from '../contexts';
@@ -31,6 +32,7 @@ const Home: NextPage = () => {
   const { account } = useContext(Web3ModalContext);
   const [title, setTitle] = useState<string>("");
   const [options, setOptions] = useState<string[]>([""]);
+  const [loadSpinStatus, setLoadSpinStatus] = useState<boolean>(false);
   const [optionCounts, setOptionCounts] = useState<number>(0);
   const [autofocus, setAutofocus] = useState<string | number>("title");
   const yamClient = useYam();
@@ -57,16 +59,29 @@ const Home: NextPage = () => {
       setOptions(options.filter((value, index) => index !== _index));
     }
   };
-
   const handleCreateVotingPol = async() => {
+    try {
       if(title.length >=1 && options[optionCounts].length >=1 ) {
         if(yamClient != undefined) {
-           await yamClient.contracts.contractsMap['VotingFactory'].methods.newVotingPoll(title, options).send({from:account});
+          yamClient.contracts.contractsMap['VotingFactory'].methods.newVotingPoll(title, options).send({from:account})
+          .on('transactionHash', function(hash:any){
+            setLoadSpinStatus(true);
+          })
+          .on('receipt', function(receipt:any){
+            setLoadSpinStatus(false);
+          })
+          .on('confirmation', function(confirmationNumber:any, receipt:any){
+            return ;
+          })
         }
       } else {
         alert("Please set exact Title value!");
       }
-  }
+    } catch(err) {
+      setLoadSpinStatus(false);
+    }
+    setLoadSpinStatus(false);
+}
 
   const handleOptionChange = (_value: string, _index: number) => {
     setOptions(
@@ -127,6 +142,17 @@ const Home: NextPage = () => {
                 onClick={handleCreateVotingPol}
                 >Create VotingPoll</Button>
               </Grid>
+            </Grid>
+            <Grid item>
+            {
+              loadSpinStatus ? (
+                <Box sx={{ width: '100%' }}>
+                  <LinearProgress />
+                </Box>
+              ) : (
+                <></>
+              )
+            }
             </Grid>
           </Box>
         </Grid>

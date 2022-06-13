@@ -1,5 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import type { NextPage } from 'next';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { Container, Grid, Typography, Box, Button} from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import { makeStyles } from "@mui/styles";
@@ -61,9 +63,11 @@ const Vote: NextPage = () => {
   const [selectedPoll, setSelectedPoll] = useState<any>();
   const [selectedTitle, setSelectedTitle] = useState<string>("");
   const [spinStatus, setSpinStatus] = useState<boolean>(true);
+  const [multiCheck, setMultiCheck] = useState<boolean>(false);
   const [titles, setTitles] = useState<string[]>([""]);
   const [options, setOptions] = useState<string[]>([""]);
   const yamClient = useYam();
+  const router = useRouter();
 
   useEffect(() => {
     const getVottingPolls = async () => {
@@ -92,7 +96,13 @@ const Vote: NextPage = () => {
         const pollContract = yamClient.contracts.contractsMap['VotingPoll'];
         pollContract.options.address = votingPolls[id];
         const _options = await pollContract.methods.getOptions().call();
-        const _owner = await pollContract.methods.getOwner().call();
+        const _multi = await pollContract.methods.getMultiCheck(account).call();
+        // setMultiCheck((_multi > 0));
+        if(_multi > 0) {
+          setMultiCheck(true);
+        } else {
+          setMultiCheck(false);
+        }
         setSelectedTitle(titles[id]);
         setSelectedPoll(pollContract);
         setOptions(_options);
@@ -105,7 +115,16 @@ const Vote: NextPage = () => {
     if(yamClient != undefined) {
       const pollContract = yamClient.contracts.contractsMap['VotingPoll'];
       pollContract.options.address = votingPolls[selectedPoll];
-      await pollContract.methods.voting(id).send({from:account});
+      pollContract.methods.voting(id).send({from:account})
+      .on('transactionHash', function(hash:any){
+        setSpinStatus(true);
+      })
+      .on('receipt', function(receipt:any){
+        setSpinStatus(false);
+      })
+      .on('confirmation', function(confirmationNumber:any, receipt:any){
+        return ;
+      })
     }
   }
 
@@ -155,9 +174,20 @@ const Vote: NextPage = () => {
                     )
                   ) : (
                     <Grid xs={12}>
-                      <Grid >
-                          <Typography>{selectedTitle}</Typography>
-                      </Grid>
+                      <Grid item>
+                        <Grid>
+                          <Typography  variant="h5">{selectedTitle}</Typography>
+                        </Grid>
+                        <Grid>
+                          <Button variant="outlined" disabled={!multiCheck}>
+                            <Link href="/voteresult" passHref>
+                              <ListItem key="voutresult" selected={router.asPath == '/voteresult'}>
+                                {'See Result'}
+                              </ListItem>
+                            </Link>
+                          </Button>
+                        </Grid>
+                    </Grid>
                     {
                       options.map((value, index) => {
                         return (
